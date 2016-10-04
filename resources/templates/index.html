@@ -1,0 +1,15 @@
+<html>
+<body>
+{{#name}}
+Hello, {{name}}!
+<form action="/logout" method="post">
+    <button type="submit">Logout</button>
+</form>
+{{/name}}
+<Strong>Welcome to the message app!!</Strong><br><br>
+{{^name}}
+<a href="/login">Click here to go to the Login page</a>
+{{/name}}
+
+<br>
+<br>
