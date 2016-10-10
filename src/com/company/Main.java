@@ -18,8 +18,6 @@ public class Main {
 
     public static void main(String[] args) {
         ArrayList<String> messages = new ArrayList<String>();
-        User john = new User("john", "john123");
-        userHashMap.put("john", john);
 
 
         Spark.get(
@@ -45,6 +43,10 @@ public class Main {
                     String password = request.queryParams("password");
                     if (!userHashMap.containsKey(name)){
                         response.redirect("/newuser");
+                    }
+                    else if (!password.equals(user.password)){
+                        response.redirect("/login");
+                        return null;
                     }
 
                     response.redirect("/create-message");
@@ -92,6 +94,16 @@ public class Main {
                     response.redirect("/create-message");
                     return null;
                 })
+        );
+
+        Spark.post(
+                "/logout",
+                (request, response) -> {
+                    user = null;
+                    userHashMap.clear();
+                    response.redirect("/");
+                    return null;
+                }
         );
 
 
