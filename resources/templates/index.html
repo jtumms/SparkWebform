@@ -6,10 +6,15 @@ Hello, {{name}}!
     <button type="submit">Logout</button>
 </form>
 {{/name}}
-<Strong>Welcome to the message app!!</Strong><br><br>
-{{^name}}
-<a href="/login">Click here to go to the Login page</a>
-{{/name}}
 
-<br>
-<br>
+{{^name}}
+<form action="/login" method="post">
+    Username: <input type="text" placeholder="Enter your name" name="loginName"/><br>
+    Password: <input type="password" placeholder="Enter your password" name="password"/>
+    <br><br>
+    <button type="submit">Login</button>
+    </form>
+
+{{/name}}
+</body>
+</html>
