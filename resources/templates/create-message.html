@@ -1,7 +1,9 @@
 <html>
 
 <body>
-<br>
+{{#name}}
+Hello, {{name}}!
+{{/name}}
 <br>
 <form action="/create-message" method="post">
 <input type="text" name="message" size="80" placeholder="type your message"><br><br>
@@ -11,13 +13,26 @@
     <button type="submit">Logout</button>
 </form>
 <br>
+<form action="/delete" method="post">
+    <input type="text" name="id" placeholder="Enter number from message list">
+    <button type="submit">Delete</button>
+</form>
+<br>
+<form action="/edit" method="post">
+    <input type="text" name="id" placeholder="Enter number from message list">
+    <input type="text" name="edit">
+    <button type="submit">Edit</button>
+</form>
 <br>
 <Strong>Messages:</Strong> <br>
-<ul>
+<form action="/delete" method="post">
+<ol>
     {{#messages}}
-    <li>{{.}}</li>
+    <li>{{text}}</li>
     {{/messages}}
-</ul>
+</ol>
+</form>
+
 </body>
 </html>
 
