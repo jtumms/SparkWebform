@@ -58,6 +58,7 @@ public class Main {
                     User user = userHashMap.get(name);
                     HashMap m = new HashMap();
                     m.put("messages", user.messages);
+                    m.put("name", name);
                     return new ModelAndView(m, "create-message.html");
                 }),
                 new MustacheTemplateEngine()
@@ -112,8 +113,38 @@ public class Main {
                     return null;
                 }
         );
-
-
+        Spark.post(
+                "/delete",
+                (request, response) -> {
+                    Session session = request.session();
+                    String name = session.attribute("loginName");
+                    User user = userHashMap.get(name);
+                    if (session == null){
+                        response.redirect("/");
+                    }
+                    String selected = request.queryParams("id");
+                    user.messages.remove(Integer.valueOf(selected) - 1);
+                    response.redirect("/create-message");
+                    return "";
+                }
+        );
+        Spark.post(
+                "/edit",
+                (request, response) -> {
+                    Session session = request.session();
+                    String name = session.attribute("loginName");
+                    User user = userHashMap.get(name);
+                    if (session == null){
+                        response.redirect("/");
+                    }
+                    String someText = request.queryParams("edit");
+                    Message message = new Message(someText);
+                    String idSelected = request.queryParams("id");
+                    user.messages.set(Integer.valueOf(idSelected) - 1, message);
+                    response.redirect("/create-message");
+                    return "";
+                }
+        );
 
     }
 }
