@@ -2,72 +2,87 @@ package com.company;
 
 
 import spark.ModelAndView;
+import spark.Session;
 import spark.Spark;
 import spark.template.mustache.MustacheTemplateEngine;
 
+import javax.jws.soap.SOAPBinding;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Main {
 
-    static User user;
-    static HashMap<String, User> userHashMap = new HashMap();
-
-
-
-
     public static void main(String[] args) {
-        ArrayList<String> messages = new ArrayList<String>();
-
+        HashMap<String, User> userHashMap = new HashMap();
 
         Spark.get(
                 "/",
                 ((request, response) -> {
-                    return new ModelAndView(null, "index.html");
-
-
-                }),
-                new MustacheTemplateEngine()
-        );
-        Spark.get(
-                "/login",
-                ((request, response) -> {
-                    return new ModelAndView(null, "login.html");
+                    Session session = request.session();
+                    String name = session.attribute("loginName");
+                    User user = userHashMap.get(name);
+                    if (user != null){
+                        response.redirect("/create-message");
+                    }
+                    return new ModelAndView(null, "/index.html");
                 }),
                 new MustacheTemplateEngine()
         );
         Spark.post(
                 "/login",
-                ((request, response) -> {
+                (request, response) -> {
                     String name = request.queryParams("loginName");
                     String password = request.queryParams("password");
+                    User user = new User();
+                    user = new User(name, password, user.messages);
                     if (!userHashMap.containsKey(name)){
                         response.redirect("/newuser");
                     }
                     else if (!password.equals(user.password)){
-                        response.redirect("/login");
+                        response.redirect("/");
                         return null;
                     }
 
+                    Session session = request.session();
+                    session.attribute("loginName", name);
+
                     response.redirect("/create-message");
-                    return null;
-                })
+                    return "";
+                }
         );
         Spark.get(
                 "/create-message",
                 ((request, response) -> {
+                    Session session = request.session();
+                    String name = session.attribute("loginName");
+                    User user = userHashMap.get(name);
                     HashMap m = new HashMap();
-                    m.put("messages", messages);
+                    m.put("messages", user.messages);
                     return new ModelAndView(m, "create-message.html");
-
-
                 }),
                 new MustacheTemplateEngine()
+        );
+        Spark.post(
+                "/create-message",
+                ((request, response) -> {
+                    Session session = request.session();
+                    String name = session.attribute("loginName");
+                    User user = userHashMap.get(name);
+                    if (user == null) {
+                        throw new Exception("User not logged in");
+                    }
+                    String input = request.queryParams("message");
+                    Message message = new Message(input);
+                    user.messages.add(message);
+                    System.out.println(user.messages);
+                    response.redirect("/create-message");
+                    return "";
+                })
         );
         Spark.get(
                 "/newuser",
                 ((request, response) -> {
-                    return new ModelAndView(null, "newuser.html");
+                    return new ModelAndView(userHashMap, "newuser.html");
 
 
                 }),
@@ -78,29 +93,21 @@ public class Main {
                 ((request, response) -> {
                     String name = request.queryParams("loginName");
                     String password = request.queryParams("password");
-                    user = new User(name, password);
+                    User user = new User();
                     userHashMap.put(name, user);
-                    response.redirect("/login");
+                    Session session = request.session();
+                    session.attribute("loginName", name);
+                    response.redirect("/");
                     return null;
                 })
         );
-        Spark.post(
-                "/create-message",
-                ((request, response) -> {
-                    String message = request.queryParams("message");
 
-                    messages.add(message);
-
-                    response.redirect("/create-message");
-                    return null;
-                })
-        );
 
         Spark.post(
                 "/logout",
                 (request, response) -> {
-                    user = null;
-                    userHashMap.clear();
+                    Session session = request.session();
+                    session.invalidate();
                     response.redirect("/");
                     return null;
                 }
